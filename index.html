@@ -6,62 +6,43 @@
     <title>Xozmag Tashkent</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 10px; background-color: #f4f4f9; }
-        
-        /* Mahsulotlar konteyneri - 2 ta ustun uchun */
-        .catalog { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* 2 ta teng qator */
-            gap: 10px; 
-        }
-        
-        .product { 
-            background: white; 
-            padding: 10px; 
-            border-radius: 8px; 
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        button { width: 100%; padding: 8px; background: #2ea6ff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 5px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        h1 { text-align: center; color: #2d3436; }
+        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .product { background: white; border-radius: 15px; padding: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .product b { display: block; margin: 10px 0; color: #6c5ce7; font-size: 18px; }
+        button { background: #6c5ce7; color: white; border: none; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #5648c0; }
+        #cart { position: fixed; bottom: 80px; left: 10px; right: 10px; background: #2d3436; color: white; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; }
+        .order-btn { position: fixed; bottom: 20px; left: 10px; right: 10px; background: #00b894; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <h2 style="text-align:center;">Mahsulotlar</h2>
-    
+    <h1>🛍 Katalog</h1>
     <div class="catalog">
         <div class="product">
-            <p>Telefon</p>
-            <b>100 000 so'm</b>
+            <p>📱 Telefon</p> <b>100 000 so'm</b>
             <button onclick="addToCart('Telefon', 100000)">Qo'shish</button>
         </div>
         <div class="product">
-            <p>Quloqchin</p>
-            <b>50 000 so'm</b>
+            <p>🎧 Quloqchin</p> <b>50 000 so'm</b>
             <button onclick="addToCart('Quloqchin', 50000)">Qo'shish</button>
         </div>
     </div>
-
-    <div id="cart" style="margin-top:20px; text-align:center;">Savat: 0 so'm</div>
-    <button style="background: green; padding: 15px; margin-top: 10px;" onclick="sendOrder()">Rasmiylashtirish</button>
+    <div id="cart">Savat: 0 so'm</div>
+    <button class="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        let cart = [];
-        let total = 0;
-
+        let cart = []; let total = 0;
         function addToCart(name, price) {
-            cart.push({name, price});
-            total += price;
+            cart.push({name, price}); total += price;
             document.getElementById('cart').innerText = "Savat: " + total + " so'm";
         }
-
         function sendOrder() {
-            let data = { items: cart, totalPrice: total };
-            tg.sendData(JSON.stringify(data));
+            tg.sendData(JSON.stringify({items: cart, total: total}));
         }
     </script>
 </body>
-</html> dimka
+</html>
