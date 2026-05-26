@@ -8,35 +8,19 @@
     <style>
         body { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; background-color: #f4f7f6; margin: 0; padding-bottom: 90px; }
         .header { text-align: center; padding: 20px; background: white; font-size: 20px; font-weight: bold; color: #2d3748; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        
-        /* Kategoriyalar */
         .tabs { display: flex; gap: 10px; padding: 15px; overflow-x: auto; }
         .tab-btn { border: none; background: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: nowrap; }
         .tab-btn:hover { background: #3182ce; color: white; }
-
-        /* Mahsulotlar */
         .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .product { background: white; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
-        .product:hover { transform: scale(1.02); }
-        .product img { width: 100%; height: 110px; object-fit: cover; border-radius: 15px; margin-bottom: 10px; }
-        .product p { font-size: 14px; font-weight: 600; margin: 5px 0; }
-        .product b { color: #3182ce; }
-        .add-btn { background: #3182ce; color: white; border: none; padding: 10px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-
-        /* Footer */
+        .product { background: white; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .product b { color: #3182ce; display: block; margin: 5px 0; }
+        .add-btn { background: #3182ce; color: white; border: none; padding: 10px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .footer { position: fixed; bottom: 0; width: 100%; background: #2d3748; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-top-left-radius: 20px; border-top-right-radius: 20px; box-sizing: border-box; }
         .order-btn { background: #cddc39; color: #000; padding: 12px 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="header">🛍 Xozmag Tashkent</div>
-    
-    <div class="tabs">
-        <button class="tab-btn">💄 Parfumeriya</button>
-        <button class="tab-btn">🥣 Chinni</button>
-        <button class="tab-btn">🛠 Qurilish</button>
-    </div>
-
     <div class="catalog" id="catalog">
         <div class="product">
             <p>Piyola Paxtagul</p>
@@ -49,7 +33,6 @@
             <button class="add-btn" onclick="addToCart('Piyola Chorgul', 5000)">Savatga</button>
         </div>
     </div>
-
     <div class="footer">
         <div>Jami: <span id="total">0</span> so'm</div>
         <button class="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
@@ -57,14 +40,27 @@
 
     <script>
         let tg = window.Telegram.WebApp; tg.expand();
-        let cart = []; let total = 0;
-        function addToCart(name, price) { 
-            cart.push({name, price}); 
-            total += price; 
-            document.getElementById('total').innerText = total; 
+        let cart = []; 
+        let total = 0;
+
+        function addToCart(name, price) {
+            // Mahsulot savatda bormi tekshiramiz
+            let existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.qty += 1;
+            } else {
+                cart.push({name: name, price: price, qty: 1});
+            }
+            total += price;
+            document.getElementById('total').innerText = total;
         }
-        function sendOrder() { 
-            tg.sendData(JSON.stringify({items: cart, total: total})); 
+
+        function sendOrder() {
+            if (cart.length === 0) {
+                alert("Savat bo'sh!");
+                return;
+            }
+            tg.sendData(JSON.stringify({items: cart, total: total}));
         }
     </script>
 </body>
