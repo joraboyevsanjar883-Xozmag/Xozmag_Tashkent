@@ -2,63 +2,85 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xozmag Tashkent</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* CSS o'zgarishsiz qoladi */
-        body { font-family: sans-serif; background-color: #f4f7f6; margin: 0; padding-bottom: 90px; }
-        .header { text-align: center; padding: 20px; font-weight: bold; background: white; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; margin: 0; padding-bottom: 100px; }
+        .header { text-align: center; padding: 20px; font-weight: bold; font-size: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
         .tabs { display: flex; gap: 10px; padding: 15px; overflow-x: auto; }
-        .tab-btn { border: none; background: white; padding: 10px 15px; border-radius: 12px; cursor: pointer; }
-        .tab-btn.active { background: #3182ce; color: white; }
+        .tab-btn { border: none; background: white; padding: 10px 15px; border-radius: 12px; border: 1px solid #e2e8f0; cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { background: #3182ce; color: white; border: none; }
+
         .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .product { background: white; padding: 10px; border-radius: 15px; text-align: center; }
-        .product img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; }
-        .add-btn { background: #3182ce; color: white; border: none; padding: 8px; width: 100%; border-radius: 8px; }
+        .product { background: white; padding: 12px; border-radius: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+        .product img { width: 100%; height: 110px; object-fit: cover; border-radius: 15px; margin-bottom: 10px; }
+        .product p { font-size: 14px; font-weight: 600; margin: 5px 0; }
+        .product b { color: #3182ce; display: block; margin-bottom: 10px; }
+        .add-btn { background: #3182ce; color: white; border: none; padding: 10px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
+
+        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; box-sizing: border-box; font-weight: bold; }
+        .order-btn { background: #48bb78; color: white; padding: 10px 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="header">🛍 Xozmag Tashkent</div>
+    <div class="header">🛒 Xozmag Tashkent</div>
     
     <div class="tabs">
         <button class="tab-btn active" onclick="filterCatalog('Hammasi', this)">Hammasi</button>
-        <button class="tab-btn" onclick="filterCatalog('Parfumeriya', this)">💄 Parfumeriya</button>
         <button class="tab-btn" onclick="filterCatalog('Chinni', this)">🥣 Chinni</button>
+        <button class="tab-btn" onclick="filterCatalog('Parfumeriya', this)">💄 Parfumeriya</button>
     </div>
 
-    <div class="catalog" id="catalog">
-        </div>
+    <div class="catalog" id="catalog"></div>
+
+    <div class="footer">
+        <div>Jami: <span id="total-price">0</span> so'm</div>
+        <button class="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
+    </div>
 
     <script>
+        let tg = window.Telegram.WebApp; tg.expand();
+        let cart = []; let total = 0;
+
         const products = [
-            {name: "Piyola Paxtagul", price: 5000, cat: "Chinni", img: "https://images.unsplash.com/photo-1594631252845-29fc4cc8c784"},
-            {name: "Atir Chanel", price: 50000, cat: "Parfumeriya", img: "https://images.unsplash.com/photo-1595536729697-380302826a6a"}
+            {name: "Piyola Paxtagul", price: 5000, cat: "Chinni", img: "https://images.unsplash.com/photo-1594631252845-29fc4cc8c784?w=300"},
+            {name: "Tarelka Chorgul", price: 15000, cat: "Chinni", img: "https://images.unsplash.com/photo-1577705998148-382f61a156e5?w=300"},
+            {name: "Atir Chanel", price: 55000, cat: "Parfumeriya", img: "https://images.unsplash.com/photo-1595536729697-380302826a6a?w=300"}
         ];
 
         function filterCatalog(cat, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             const container = document.getElementById('catalog');
             container.innerHTML = '';
-            
             products.forEach(p => {
                 if (cat === 'Hammasi' || p.cat === cat) {
                     container.innerHTML += `
                         <div class="product">
                             <img src="${p.img}">
                             <p>${p.name}</p>
-                            <b>${p.price} so'm</b>
+                            <b>${p.price.toLocaleString()} so'm</b>
                             <button class="add-btn" onclick="addToCart('${p.name}', ${p.price})">Savatga</button>
                         </div>
                     `;
                 }
             });
         }
-        filterCatalog('Hammasi', document.querySelector('.tab-btn')); // Dastlab hammasini ko'rsatish
-        
-        let cart = [];
-        function addToCart(name, price) { cart.push({name, price}); alert("Qo'shildi: " + name); }
+
+        function addToCart(name, price) {
+            cart.push({name, price});
+            total += price;
+            document.getElementById('total-price').innerText = total.toLocaleString();
+        }
+
+        function sendOrder() {
+            if(cart.length === 0) return alert("Savat bo'sh!");
+            tg.sendData(JSON.stringify({items: cart, total: total}));
+        }
+
+        filterCatalog('Hammasi', document.querySelector('.tab-btn'));
     </script>
 </body>
 </html>
