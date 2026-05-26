@@ -7,26 +7,44 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: sans-serif; padding: 10px; background-color: #f4f4f9; }
-        .product { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        button { padding: 10px; background: #2ea6ff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        #cart { margin-top: 20px; font-weight: bold; }
+        
+        /* Mahsulotlar konteyneri - 2 ta ustun uchun */
+        .catalog { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* 2 ta teng qator */
+            gap: 10px; 
+        }
+        
+        .product { 
+            background: white; 
+            padding: 10px; 
+            border-radius: 8px; 
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        button { width: 100%; padding: 8px; background: #2ea6ff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>Katalog</h1>
+    <h2 style="text-align:center;">Mahsulotlar</h2>
     
-    <div class="product">
-        <span>Telefon - 100 000 so'm</span>
-        <button onclick="addToCart('Telefon', 100000)">Qo'shish</button>
-    </div>
-    <div class="product">
-        <span>Quloqchin - 50 000 so'm</span>
-        <button onclick="addToCart('Quloqchin', 50000)">Qo'shish</button>
+    <div class="catalog">
+        <div class="product">
+            <p>Telefon</p>
+            <b>100 000 so'm</b>
+            <button onclick="addToCart('Telefon', 100000)">Qo'shish</button>
+        </div>
+        <div class="product">
+            <p>Quloqchin</p>
+            <b>50 000 so'm</b>
+            <button onclick="addToCart('Quloqchin', 50000)">Qo'shish</button>
+        </div>
     </div>
 
-    <div id="cart">Savat: 0 so'm</div>
-    <button style="width: 100%; margin-top: 20px; background: green;" onclick="sendOrder()">Rasmiylashtirish</button>
+    <div id="cart" style="margin-top:20px; text-align:center;">Savat: 0 so'm</div>
+    <button style="background: green; padding: 15px; margin-top: 10px;" onclick="sendOrder()">Rasmiylashtirish</button>
 
     <script>
         let tg = window.Telegram.WebApp;
@@ -41,10 +59,7 @@
         }
 
         function sendOrder() {
-            let data = {
-                items: cart,
-                total: total
-            };
+            let data = { items: cart, totalPrice: total };
             tg.sendData(JSON.stringify(data));
         }
     </script>
