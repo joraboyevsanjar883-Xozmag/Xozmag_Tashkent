@@ -2,49 +2,63 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xozmag Tashkent</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding-bottom: 80px; }
-        .header { text-align: center; padding: 20px; font-size: 20px; font-weight: bold; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        /* CSS o'zgarishsiz qoladi */
+        body { font-family: sans-serif; background-color: #f4f7f6; margin: 0; padding-bottom: 90px; }
+        .header { text-align: center; padding: 20px; font-weight: bold; background: white; }
+        .tabs { display: flex; gap: 10px; padding: 15px; overflow-x: auto; }
+        .tab-btn { border: none; background: white; padding: 10px 15px; border-radius: 12px; cursor: pointer; }
+        .tab-btn.active { background: #3182ce; color: white; }
         .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .product { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); text-align: center; }
-        /* Rasm uslubi */
-        .product img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; }
-        .product p { font-size: 14px; font-weight: 600; margin: 5px 0; }
-        .product b { color: #3182ce; display: block; margin-bottom: 8px; }
-        .add-btn { background: #3182ce; color: white; border: none; padding: 8px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .footer { position: fixed; bottom: 0; width: 100%; background: #2d3748; color: white; padding: 15px; text-align: center; font-weight: bold; }
+        .product { background: white; padding: 10px; border-radius: 15px; text-align: center; }
+        .product img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; }
+        .add-btn { background: #3182ce; color: white; border: none; padding: 8px; width: 100%; border-radius: 8px; }
     </style>
 </head>
 <body>
     <div class="header">🛍 Xozmag Tashkent</div>
     
-    <div class="catalog">
-        <div class="product">
-            <img src="https://images.unsplash.com/photo-1594631252845-29fc4cc8c784" alt="Piyola">
-            <p>Piyola Paxtagul</p>
-            <b>5 000 so'm</b>
-            <button class="add-btn" onclick="addToCart('Piyola Paxtagul', 5000)">Savatga</button>
-        </div>
-        <div class="product">
-            <img src="https://images.unsplash.com/photo-1577705998148-382f61a156e5" alt="Piyola">
-            <p>Piyola Chorgul</p>
-            <b>5 000 so'm</b>
-            <button class="add-btn" onclick="addToCart('Piyola Chorgul', 5000)">Savatga</button>
-        </div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="filterCatalog('Hammasi', this)">Hammasi</button>
+        <button class="tab-btn" onclick="filterCatalog('Parfumeriya', this)">💄 Parfumeriya</button>
+        <button class="tab-btn" onclick="filterCatalog('Chinni', this)">🥣 Chinni</button>
     </div>
 
-    <div class="footer">
-        Jami: <span id="total">0</span> so'm | <button onclick="sendOrder()" style="background:#cddc39; border:none; padding:5px 10px; border-radius:5px;">Rasmiylashtirish</button>
-    </div>
+    <div class="catalog" id="catalog">
+        </div>
 
     <script>
-        let tg = window.Telegram.WebApp; tg.expand();
-        let cart = []; let total = 0;
-        function addToCart(n, p) { cart.push({name:n, price:p}); total+=p; document.getElementById('total').innerText = total; }
-        function sendOrder() { tg.sendData(JSON.stringify({items: cart, total: total})); }
+        const products = [
+            {name: "Piyola Paxtagul", price: 5000, cat: "Chinni", img: "https://images.unsplash.com/photo-1594631252845-29fc4cc8c784"},
+            {name: "Atir Chanel", price: 50000, cat: "Parfumeriya", img: "https://images.unsplash.com/photo-1595536729697-380302826a6a"}
+        ];
+
+        function filterCatalog(cat, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const container = document.getElementById('catalog');
+            container.innerHTML = '';
+            
+            products.forEach(p => {
+                if (cat === 'Hammasi' || p.cat === cat) {
+                    container.innerHTML += `
+                        <div class="product">
+                            <img src="${p.img}">
+                            <p>${p.name}</p>
+                            <b>${p.price} so'm</b>
+                            <button class="add-btn" onclick="addToCart('${p.name}', ${p.price})">Savatga</button>
+                        </div>
+                    `;
+                }
+            });
+        }
+        filterCatalog('Hammasi', document.querySelector('.tab-btn')); // Dastlab hammasini ko'rsatish
+        
+        let cart = [];
+        function addToCart(name, price) { cart.push({name, price}); alert("Qo'shildi: " + name); }
     </script>
 </body>
 </html>
