@@ -6,42 +6,51 @@
     <title>Xozmag Tashkent</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-        h1 { text-align: center; color: #2d3436; }
-        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .product { background: white; border-radius: 15px; padding: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .product b { display: block; margin: 10px 0; color: #6c5ce7; font-size: 18px; }
-        button { background: #6c5ce7; color: white; border: none; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #5648c0; }
-        #cart { position: fixed; bottom: 80px; left: 10px; right: 10px; background: #2d3436; color: white; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; }
-        .order-btn { position: fixed; bottom: 20px; left: 10px; right: 10px; background: #00b894; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        body { font-family: sans-serif; background: #fdfdfd; margin: 0; padding: 10px; }
+        .header { text-align: center; font-weight: bold; margin-bottom: 15px; font-size: 18px; }
+        .tabs { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 5px; }
+        .tab-btn { border: 1px solid #ddd; background: #fff; padding: 8px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; flex: 1; }
+        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .product { background: white; border: 1px solid #eee; border-radius: 15px; padding: 10px; text-align: center; }
+        .product p { font-size: 13px; margin: 5px 0; font-weight: bold; }
+        .add-btn { background: #4a5568; color: white; border-radius: 10px; border: none; padding: 8px; width: 100%; font-size: 12px; cursor: pointer; margin-top: 5px; }
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 2px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .order-btn { background: #cddc39; padding: 12px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>🛍 Katalog</h1>
-    <div class="catalog">
+    <div class="header">🛍 Xozmag Tashkent</div>
+    <div class="tabs">
+        <button class="tab-btn">💄 Parfumeriya</button>
+        <button class="tab-btn">🥣 Chinni</button>
+        <button class="tab-btn">🛠 Qurilish</button>
+    </div>
+    <div class="catalog" id="catalog">
         <div class="product">
-            <p>📱 Telefon</p> <b>100 000 so'm</b>
-            <button onclick="addToCart('Telefon', 100000)">Qo'shish</button>
+            <p>Piyola Chorgul</p>
+            <p>5000 so'm</p>
+            <button class="add-btn" onclick="addToCart('Piyola Chorgul', 5000)">Savatga</button>
         </div>
         <div class="product">
-            <p>🎧 Quloqchin</p> <b>50 000 so'm</b>
-            <button onclick="addToCart('Quloqchin', 50000)">Qo'shish</button>
+            <p>Parfum Perfume</p>
+            <p>5000 so'm</p>
+            <button class="add-btn" onclick="addToCart('Parfum Perfume', 5000)">Savatga</button>
         </div>
     </div>
-    <div id="cart">Savat: 0 so'm</div>
-    <button class="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
-
+    <div class="footer">
+        <div>Jami: <span id="total">0</span> so'm</div>
+        <button class="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
+    </div>
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        let tg = window.Telegram.WebApp; tg.expand();
         let cart = []; let total = 0;
-        function addToCart(name, price) {
-            cart.push({name, price}); total += price;
-            document.getElementById('cart').innerText = "Savat: " + total + " so'm";
+        function addToCart(name, price) { 
+            cart.push({name, price}); 
+            total += price; 
+            document.getElementById('total').innerText = total; 
         }
-        function sendOrder() {
-            tg.sendData(JSON.stringify({items: cart, total: total}));
+        function sendOrder() { 
+            tg.sendData(JSON.stringify({items: cart, total: total})); 
         }
     </script>
 </body>
