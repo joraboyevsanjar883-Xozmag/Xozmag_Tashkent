@@ -3,335 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xozmag Tashkent - Katalog</title>
+    <title>Xozmag Tashkent</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        body {
-            background-color: #f4f6f9;
-            padding: 10px;
-            padding-bottom: 80px;
-        }
-        .header {
-            text-align: center;
-            padding: 15px 0;
-            background: #fff;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .header h2 {
-            font-size: 20px;
-            color: #333;
-        }
-        .categories-tabs {
-            display: flex;
-            overflow-x: auto;
-            gap: 10px;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-        .tab-btn {
-            background: #fff;
-            border: 1px solid #ddd;
-            padding: 8px 16px;
-            border-radius: 20px;
-            white-space: nowrap;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            color: #555;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            background: #248bfa;
-            color: #fff;
-            border-color: #248bfa;
-        }
-        /* 📱 TOVARLARNI 2 TA 2 TADAN GRID (PANJARA) SHAKLIGA SOLISH */
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-        .product-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-            position: relative;
-        }
-        /* 🖼 RASMLARNI CHIROYLI KVADRAT SHAKLGA KELTIRISH */
-        .image-container {
-            width: 100%;
-            padding-top: 100%; /* 1:1 Kvadrat nisbat */
-            position: relative;
-            background: #f8f9fa;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        .image-container img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Rasmni buzmasdan kvadrat ichiga joylaydi */
-        }
-        .product-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 6px;
-            line-height: 1.3;
-            height: 36px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .product-price {
-            font-size: 15px;
-            color: #248bfa;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .product-price s {
-            font-size: 11px;
-            color: #999;
-            margin-right: 4px;
-        }
-        .add-btn {
-            width: 100%;
-            background: #248bfa;
-            color: #fff;
-            border: none;
-            padding: 8px 0;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .counter-container {
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-        .count-btn {
-            background: #e4e6eb;
-            color: #333;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .count-num {
-            font-weight: bold;
-            font-size: 15px;
-        }
-        /* 🛒 PASTDAGI SAVATCHA PANEL */
-        .cart-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #fff;
-            padding: 15px;
-            box-shadow: 0 -3px 10px rgba(0,0,0,0.08);
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-        }
-        .cart-info-text {
-            font-size: 15px;
-            font-weight: bold;
-            color: #333;
-        }
-        .checkout-btn {
-            background: #31b54a;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-        }
+        body { font-family: sans-serif; padding: 10px; background-color: #f4f4f9; }
+        .product { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        button { padding: 10px; background: #2ea6ff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #cart { margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2>🛒 Xozmag Tashkent</h2>
+    <h1>Katalog</h1>
+    
+    <div class="product">
+        <span>Telefon - 100 000 so'm</span>
+        <button onclick="addToCart('Telefon', 100000)">Qo'shish</button>
+    </div>
+    <div class="product">
+        <span>Quloqchin - 50 000 so'm</span>
+        <button onclick="addToCart('Quloqchin', 50000)">Qo'shish</button>
     </div>
 
-    <div class="categories-tabs">
-        <button class="tab-btn active" onclick="filterCategory('all')">📦 Hammasi</button>
-        <button class="tab-btn" onclick="filterCategory('perfume')">✨ Parfumeriya & Kosmetika</button>
-        <button class="tab-btn" onclick="filterCategory('chinni')">🍽 Chinni buyumlar</button>
-        <button class="tab-btn" onclick="filterCategory('stroy')">🛠 Qurilish mollari</button>
-        <button class="tab-btn" onclick="filterCategory('cleaning')">🧹 Tozalash vositalari</button>
-    </div>
-
-    <div class="products-grid" id="products-container"></div>
-
-    <div class="cart-bar" id="cart-bar">
-        <div class="cart-info-text" id="cart-total-text">Jami: 0 so'm</div>
-        <button class="checkout-btn" onclick="sendOrder()">🛒 Rasmiylashtirish</button>
-    </div>
+    <div id="cart">Savat: 0 so'm</div>
+    <button style="width: 100%; margin-top: 20px; background: green;" onclick="sendOrder()">Rasmiylashtirish</button>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Aynani to'liq ekranda ochish
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        let cart = [];
+        let total = 0;
 
-        // 📦 TOVARLAR BAZASI (Rasmlar avtomatik kvadrat shaklda 2 tadan yonma-yon teriladi)
-        const products = [
-            {id: 1, category: "chinni", name: "Piyola Paxtagul", price: 5000, oldPrice: 0, image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500"},
-            {id: 2, category: "chinni", name: "Piyola Chorgul (Zarhal)", price: 5000, oldPrice: 0, image: "https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=500"},
-            {id: 3, category: "cleaning", name: "Plastmassa chelak 10L", price: 12000, oldPrice: 0, image: "https://images.unsplash.com/photo-1598516518663-8e7c10b48450?w=500"},
-            {id: 4, category: "cleaning", name: "Suyuq sovun 5L", price: 32000, oldPrice: 0, image: "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=500"},
-            {id: 5, category: "chinni", name: "Sprite 0.5L (AKSIYA!)", price: 8000, oldPrice: 12000, image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500"}
-        ];
-
-        let cart = {};
-
-        function renderProducts(currentCategory = 'all') {
-            const container = document.getElementById('products-container');
-            container.innerHTML = '';
-            
-            const filtered = currentCategory === 'all' ? products : products.filter(p => p.category === currentCategory);
-            
-            filtered.forEach(p => {
-                const qty = cart[p.id] || 0;
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                
-                let priceHTML = `${p.price.toLocaleString()} so'm`;
-                if(p.oldPrice > 0) {
-                    priceHTML = `<s>${p.oldPrice.toLocaleString()}</s> ${p.price.toLocaleString()} so'm`;
-                }
-
-                card.innerHTML = `
-                    <div>
-                        <div class="image-container">
-                            <img src="${p.image}" alt="${p.name}">
-                        </div>
-                        <div class="product-name">${p.name}</div>
-                    </div>
-                    <div>
-                        <div class="product-price">${priceHTML}</div>
-                        <button class="add-btn" id="add-btn-${p.id}" style="display: ${qty > 0 ? 'none' : 'block'}" onclick="changeQty(${p.id}, 1)">📥 Savatga</button>
-                        <div class="counter-container" id="counter-${p.id}" style="display: ${qty > 0 ? 'flex' : 'none'}">
-                            <button class="count-btn" onclick="changeQty(${p.id}, -1)">-</button>
-                            <span class="count-num" id="qty-num-${p.id}">${qty}</span>
-                            <button class="count-btn" onclick="changeQty(${p.id}, 1)">+</button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function filterCategory(cat, event) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            if(window.event) {
-                window.event.target.classList.add('active');
-            }
-            renderProducts(cat);
-        }
-
-        function changeQty(id, delta) {
-            let currentQty = cart[id] || 0;
-            currentQty += delta;
-            
-            if (currentQty <= 0) {
-                delete cart[id];
-            } else {
-                cart[id] = currentQty;
-            }
-            
-            updateCartBar();
-            
-            // UI yangilash
-            const addBtn = document.getElementById(`add-btn-${id}`);
-            const counter = document.getElementById(`counter-${id}`);
-            const qtyNum = document.getElementById(`qty-num-${id}`);
-            
-            const qty = cart[id] || 0;
-            if(qty > 0) {
-                if(addBtn) addBtn.style.display = 'none';
-                if(counter) counter.style.display = 'flex';
-                if(qtyNum) qtyNum.innerText = qty;
-            } else {
-                if(addBtn) addBtn.style.display = 'block';
-                if(counter) counter.style.display = 'none';
-            }
-        }
-
-        function updateCartBar() {
-            const cartBar = document.getElementById('cart-bar');
-            let total = 0;
-            let hasItems = false;
-            
-            for (const id in cart) {
-                const prod = products.find(p => p.id == id);
-                if(prod) {
-                    total += prod.price * cart[id];
-                    hasItems = true;
-                }
-            }
-            
-            if(hasItems) {
-                cartBar.style.display = 'flex';
-                document.getElementById('cart-total-text').innerText = `Jami: ${total.toLocaleString()} so'm`;
-            } else {
-                cartBar.style.display = 'none';
-            }
+        function addToCart(name, price) {
+            cart.push({name, price});
+            total += price;
+            document.getElementById('cart').innerText = "Savat: " + total + " so'm";
         }
 
         function sendOrder() {
-            const orderItems = [];
-            let total = 0;
-            
-            for (const id in cart) {
-                const prod = products.find(p => p.id == id);
-                if(prod) {
-                    orderItems.append({
-                        id: prod.id,
-                        name: prod.name,
-                        price: prod.price,
-                        qty: cart[id]
-                    });
-                    total += prod.price * cart[id];
-                }
-            }
-            
-            const resultData = {
-                items: orderItems,
-                totalPrice: total
+            let data = {
+                items: cart,
+                total: total
             };
-            
-            // Ma'lumotlarni Python botga yuborish va oynani yopish
-            tg.sendData(JSON.stringify(resultData));
-            tg.close();
+            tg.sendData(JSON.stringify(data));
         }
-
-        // Birinchi marta yuklanganda tovarlarni chiqarish
-        renderProducts();
     </script>
 </body>
-</html>
+</html> 
