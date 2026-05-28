@@ -1,75 +1,31 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xozmag Tashkent</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body { font-family: sans-serif; margin: 0; padding-bottom: 100px; background-color: #f8f9fa; }
-        .header { background: #1a2a6c; color: white; padding: 20px; text-align: center; font-weight: bold; }
-        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .product { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .add-btn { background: #ffcc00; border: none; padding: 8px; border-radius: 8px; width: 100%; cursor: pointer; margin-top: 10px; }
-        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #ccc; box-sizing: border-box; }
-        .order-btn { background: #27ae60; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="header" id="title">Xozmag Tashkent</div>
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+    
+    let total = 0;
+    const urlParams = new URLSearchParams(window.location.search);
+    const lang = urlParams.get('lang');
 
-    <div class="catalog">
-        <div class="product">
-            <p>Piyola Paxtagul</p>
-            <span class="price">10 000 so'm</span>
-            <button class="add-btn" onclick="addToCart(10000)">Savatga</button>
-        </div>
-        <div class="product">
-            <p>Tarelka Chorgul</p>
-            <span class="price">15 000 so'm</span>
-            <button class="add-btn" onclick="addToCart(15000)">Savatga</button>
-        </div>
-    </div>
+    if (lang === 'rus') {
+        document.getElementById('title').innerText = "Xozmag Tashkent (Каталог)";
+        document.getElementById('order-btn').innerText = "Оформить заказ";
+        document.getElementById('total-text').innerText = "Итого: 0 сум";
+    }
 
-    <div class="footer">
-        <div id="total-text">Jami: 0 so'm</div>
-        <button class="order-btn" id="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
-    </div>
+    function addToCart(price) { 
+        total += price; 
+        document.getElementById('total-text').innerText = (lang === 'rus') ? "Итого: " + total + " сум" : "Jami: " + total + " so'm";
+        tg.HapticFeedback.impactOccurred('light');
+    }
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        let total = 0;
-        const lang = new URLSearchParams(window.location.search).get('lang');
-
-        // Tilni sozlash
-        if (lang === 'rus') {
-            document.getElementById('title').innerText = "Xozmag Tashkent (Каталог)";
-            document.getElementById('order-btn').innerText = "Оформить заказ";
-            document.getElementById('total-text').innerText = "Итого: 0 сум";
+    function sendOrder() { 
+        if (total === 0) {
+            alert(lang === 'rus' ? "Корзина пуста!" : "Savat bo'sh!");
+            return;
         }
-
-        function addToCart(price) { 
-            total += price; 
-            document.getElementById('total-text').innerText = (lang === 'rus') ? "Итого: " + total + " сум" : "Jami: " + total + " so'm";
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function sendOrder() { 
-            if (total === 0) {
-                alert(lang === 'rus' ? "Корзина пуста!" : "Savat bo'sh!");
-                return;
-            }
-            
-            // Telegram botga ma'lumot jo'natish
-            tg.sendData(JSON.stringify({
-                "total": total
-            }));
-            
-            // Oynani yopish
-            tg.close();
-        }
-    </script>
-</body>
-</html>
+        // Ma'lumot yuborish
+        tg.sendData(JSON.stringify({"total": total}));
+        // Oynani yopish - muhim!
+        tg.close();
+    }
+</script>

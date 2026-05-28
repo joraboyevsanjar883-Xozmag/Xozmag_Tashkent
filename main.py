@@ -25,6 +25,7 @@ class OrderState(StatesGroup):
 @dp.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
+    # Reply keyboard orqali til tanlatamiz
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text="🇺🇿 O'zbekcha"), KeyboardButton(text="🇷🇺 Русский"))
     builder.adjust(2)
@@ -35,16 +36,18 @@ async def process_lang(message: Message, state: FSMContext):
     lang_code = "rus" if message.text == "🇷🇺 Русский" else "uz"
     await state.update_data(lang=lang_code)
     
-    # Katalog tugmasi (Inline)
+    # Inline Katalog tugmasi
     builder = InlineKeyboardBuilder()
     text = "🛍 Katalog" if lang_code == "uz" else "🛍 Каталог"
     builder.add(InlineKeyboardButton(text=text, web_app={"url": f"{WEB_APP_URL}?lang={lang_code}"}))
     
-    await message.answer("✅", reply_markup=ReplyKeyboardRemove()) # Pastki tugmalarni o'chiradi
+    # Eski klaviaturani butunlay o'chiramiz
+    await message.answer("✅", reply_markup=ReplyKeyboardRemove()) 
     await message.answer("Katalogga o'tish:" if lang_code == "uz" else "Перейти в каталог:", reply_markup=builder.as_markup())
 
 @dp.message(F.web_app_data)
 async def web_data(message: Message, state: FSMContext):
+    # WebApp dan ma'lumot qabul qilish
     data = json.loads(message.web_app_data.data)
     await state.update_data(price=data.get('total'))
     lang = (await state.get_data()).get('lang')
@@ -61,7 +64,7 @@ async def get_name(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
     btn = "📱 Raqamni yuborish" if lang == "uz" else "📱 Отправить номер"
     builder.add(KeyboardButton(text=btn, request_contact=True))
-    await message.answer("📞 Raqamingizni yuboring:", reply_markup=builder.as_markup(resize_keyboard=True))
+    await message.answer("📞 Raqamingizni yuboring:" if lang == "uz" else "📞 Отправьте ваш номер:", reply_markup=builder.as_markup(resize_keyboard=True))
     await state.set_state(OrderState.waiting_for_phone)
 
 @dp.message(OrderState.waiting_for_phone)
@@ -81,5 +84,8 @@ async def get_addr(message: Message, state: FSMContext):
     await message.answer(txt)
     await state.clear()
 
+async def main():
+    await dp.start_polling(bot)
+
 if __name__ == "__main__":
-    asyncio.run(dp.start_polling(bot))
+    asyncio.run(main())
