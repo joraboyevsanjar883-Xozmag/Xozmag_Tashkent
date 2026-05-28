@@ -10,7 +10,6 @@ from aiogram.fsm.state import State, StatesGroup
 
 TOKEN = "8624663091:AAEeuXAxCj85QeGIbAkLwsMgpTRYPhBpRMI"
 ADMIN_ID = 1181202230
-PAYME_APP_LINK = "https://payme.uz/fallback/pay/64cb5d7b5b15be60bd5e8cc7"
 WEB_APP_URL = "https://joraboyevsanjar883-xozmag.github.io/Xozmag_Tashkent/"
 
 bot = Bot(token=TOKEN)
@@ -23,18 +22,6 @@ class OrderState(StatesGroup):
     waiting_for_address = State()
     waiting_for_payment = State()
 
-# Tilga qarab keyboard yasash funksiyasi
-def get_main_keyboard(lang):
-    builder = ReplyKeyboardBuilder()
-    if lang == "🇺🇿 O'zbekcha":
-        builder.add(KeyboardButton(text="🛍 Katalog (Do'kon)", web_app=WebAppInfo(url=WEB_APP_URL)))
-        builder.add(KeyboardButton(text="🔄 Qayta boshlash"))
-    else:
-        builder.add(KeyboardButton(text="🛍 Каталог (Магазин)", web_app=WebAppInfo(url=WEB_APP_URL)))
-        builder.add(KeyboardButton(text="🔄 Перезапустить"))
-    builder.adjust(1, 1)
-    return builder.as_markup(resize_keyboard=True)
-
 @dp.message(CommandStart())
 async def command_start_handler(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
@@ -46,10 +33,22 @@ async def command_start_handler(message: Message, state: FSMContext):
 @dp.message(OrderState.waiting_for_lang)
 async def process_language(message: Message, state: FSMContext):
     lang = message.text
-    await state.update_data(lang=lang)
-    text = "Xush kelibsiz!" if lang == "🇺🇿 O'zbekcha" else "Добро пожаловать!"
-    await message.answer(text, reply_markup=get_main_keyboard(lang))
-    await state.set_state(None) # Holatni tozalaymiz
+    lang_code = "rus" if lang == "🇷🇺 Русский" else "uz"
+    await state.update_data(lang=lang, lang_code=lang_code)
+    
+    # URL ga tilni qo'shib yuboramiz
+    url = f"{WEB_APP_URL}?lang={lang_code}"
+    
+    builder = ReplyKeyboardBuilder()
+    btn_text = "🛍 Katalog (Do'kon)" if lang == "🇺🇿 O'zbekcha" else "🛍 Каталог (Магазин)"
+    restart_text = "🔄 Qayta boshlash" if lang == "🇺🇿 O'zbekcha" else "🔄 Перезапустить"
+    
+    builder.add(KeyboardButton(text=btn_text, web_app=WebAppInfo(url=url)))
+    builder.add(KeyboardButton(text=restart_text))
+    builder.adjust(1)
+    
+    await message.answer("✅ Til tanlandi. Katalogga o'ting:", reply_markup=builder.as_markup(resize_keyboard=True))
+    await state.set_state(None)
 
 @dp.message(F.text.in_({"🔄 Qayta boshlash", "🔄 Перезапустить"}))
 async def restart_handler(message: Message, state: FSMContext):
@@ -59,32 +58,25 @@ async def restart_handler(message: Message, state: FSMContext):
 @dp.message(F.web_app_data)
 async def web_app_data_handler(message: Message, state: FSMContext):
     data = json.loads(message.web_app_data.data)
-    user_data = await state.get_data()
-    lang = user_data.get('lang', "🇺🇿 O'zbekcha")
-    
     await state.update_data(cart_items=data['items'], total_price=data['total'])
     
+    lang = (await state.get_data()).get('lang')
     txt = "👤 Ism-familiyangizni kiriting:" if lang == "🇺🇿 O'zbekcha" else "👤 Введите ваше имя:"
     await message.answer(txt, reply_markup=ReplyKeyboardRemove())
     await state.set_state(OrderState.waiting_for_name)
 
-# --- Qolgan barcha OrderState qismlariga ham xuddi shunday 'lang' tekshiruvini qo'shishingiz kerak ---
-# Misol uchun:
 @dp.message(OrderState.waiting_for_name)
 async def process_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
-    user_data = await state.get_data()
-    lang = user_data.get('lang', "🇺🇿 O'zbekcha")
+    lang = (await state.get_data()).get('lang')
     
     builder = ReplyKeyboardBuilder()
-    txt_btn = "📱 Telefon raqamni yuborish" if lang == "🇺🇿 O'zbekcha" else "📱 Отправить номер телефона"
-    builder.add(KeyboardButton(text=txt_btn, request_contact=True))
-    
-    txt_msg = "📞 Telefoningizni yuboring:" if lang == "🇺🇿 O'zbekcha" else "📞 Отправьте ваш номер телефона:"
-    await message.answer(txt_msg, reply_markup=builder.as_markup(resize_keyboard=True))
+    txt = "📱 Telefon raqamni yuborish" if lang == "🇺🇿 O'zbekcha" else "📱 Отправить номер"
+    builder.add(KeyboardButton(text=txt, request_contact=True))
+    await message.answer("📞 Telefoningizni yuboring:", reply_markup=builder.as_markup(resize_keyboard=True))
     await state.set_state(OrderState.waiting_for_phone)
 
-# ... qolgan funksiyalarni ham xuddi shu mantiqda o'zgartirasiz ...
+# ... qolgan bosqichlarni ham xuddi shunday davom ettirasiz ...
 
 async def main():
     await dp.start_polling(bot)
