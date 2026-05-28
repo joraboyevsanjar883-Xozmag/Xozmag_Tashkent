@@ -8,19 +8,14 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding-bottom: 80px; background: #f4f4f9; }
         .header { background: #1a2a6c; color: white; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid #ffcc00; }
-        
-        /* Kategoriyalar menyusi */
         .categories { display: flex; overflow-x: auto; padding: 10px; gap: 10px; background: white; white-space: nowrap; }
         .categories button { padding: 8px 15px; border: 1px solid #1a2a6c; border-radius: 20px; background: white; color: #1a2a6c; font-weight: bold; cursor: pointer; }
-        
         .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .product { background: white; padding: 10px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .product img { width: 100%; height: 100px; border-radius: 10px; object-fit: cover; }
         .product p { margin: 8px 0 5px 0; font-weight: 600; font-size: 0.9rem; }
         .price { color: #555; font-size: 0.85rem; margin-bottom: 8px; display: block; }
-        
         .add-btn { background: #ffcc00; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
-        
         .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #ddd; box-sizing: border-box; }
         .order-btn { background: #28a745; color: white; padding: 12px 20px; border-radius: 10px; border: none; font-weight: bold; }
     </style>
@@ -52,18 +47,38 @@
 
     <div class="footer">
         <div id="total" style="font-weight: bold;">Jami: 0 so'm</div>
-        <button class="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
+        <button class="order-btn" id="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp; tg.expand();
         let total = 0;
+        
+        // Tilni URL dan aniqlash
+        const urlParams = new URLSearchParams(window.location.search);
+        const lang = urlParams.get('lang');
+
+        // Tilga qarab interfeysni moslash
+        if (lang === 'rus') {
+            document.getElementById('order-btn').innerText = "Оформить заказ";
+            document.getElementById('total').innerText = "Итого: 0 сум";
+        }
+
         function addToCart(name, price) { 
             total += price; 
-            document.getElementById('total').innerText = "Jami: " + total + " so'm"; 
+            const totalText = (lang === 'rus') ? "Итого: " + total + " сум" : "Jami: " + total + " so'm";
+            document.getElementById('total').innerText = totalText;
             tg.HapticFeedback.impactOccurred('light');
         }
-        function sendOrder() { tg.sendData(JSON.stringify({total: total})); }
+
+        function sendOrder() { 
+            // Botga yuboriladigan aniq ma'lumot formati
+            let data = {
+                items: "Mahsulotlar tanlandi",
+                total: total
+            };
+            tg.sendData(JSON.stringify(data)); 
+        }
     </script>
 </body>
 </html>
