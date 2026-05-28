@@ -4,28 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xozmag Tashkent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding-bottom: 80px; background: #f4f4f9; }
-        .header { background: #1a2a6c; color: white; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid #ffcc00; }
-        .categories { display: flex; overflow-x: auto; padding: 10px; gap: 10px; background: white; white-space: nowrap; }
-        .categories button { padding: 8px 15px; border: 1px solid #1a2a6c; border-radius: 20px; background: white; color: #1a2a6c; font-weight: bold; cursor: pointer; }
-        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
-        .product { background: white; padding: 10px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .product img { width: 100%; height: 100px; border-radius: 10px; object-fit: cover; }
-        .product p { margin: 8px 0 5px 0; font-weight: 600; font-size: 0.9rem; }
-        .price { color: #555; font-size: 0.85rem; margin-bottom: 8px; display: block; }
-        .add-btn { background: #ffcc00; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
-        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #ddd; box-sizing: border-box; }
-        .order-btn { background: #28a745; color: white; padding: 12px 20px; border-radius: 10px; border: none; font-weight: bold; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; padding-bottom: 90px; 
+            background-color: #f8f9fa;
+            /* Naqsh fon qismi */
+            background-image: url("https://www.transparenttextures.com/patterns/arabesque.png");
+            color: #333;
+        }
+        .header { 
+            background: linear-gradient(135deg, #1a2a6c, #4a5d9a); 
+            color: white; padding: 20px; text-align: center; 
+            font-weight: 700; font-size: 1.4rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .categories { 
+            display: flex; gap: 10px; padding: 15px; 
+            background: white; overflow-x: auto; border-bottom: 1px solid #eee;
+        }
+        .categories button { 
+            padding: 10px 20px; border: none; border-radius: 25px; 
+            background: #eef2f7; color: #1a2a6c; font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .categories button:hover { background: #1a2a6c; color: white; }
+        
+        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+        .product { 
+            background: white; padding: 15px; border-radius: 16px; 
+            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+        }
+        .product img { width: 100%; height: 110px; border-radius: 12px; object-fit: cover; }
+        .product p { margin: 10px 0 5px 0; font-weight: 700; font-size: 0.95rem; }
+        .price { color: #28a745; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; display: block; }
+        
+        .add-btn { 
+            background: #ffcc00; border: none; padding: 10px 15px; 
+            border-radius: 12px; font-weight: 700; font-size: 0.85rem; cursor: pointer; width: 100%;
+        }
+        
+        .footer { 
+            position: fixed; bottom: 0; width: 100%; background: white; 
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid #eee; box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        .order-btn { 
+            background: #27ae60; color: white; padding: 12px 25px; 
+            border-radius: 12px; border: none; font-weight: 700; font-size: 1rem;
+        }
     </style>
 </head>
 <body>
     <div class="header">🛍 Xozmag Tashkent</div>
 
     <div class="categories">
-        <button>Parfumeriya</button>
-        <button>Kosmetika</button>
+        <button>Parfumeriya & Kosmetika</button>
         <button>Chinni</button>
         <button>Qurilish</button>
     </div>
@@ -46,19 +83,16 @@
     </div>
 
     <div class="footer">
-        <div id="total" style="font-weight: bold;">Jami: 0 so'm</div>
+        <div id="total" style="font-weight: 700; font-size: 1.1rem;">Jami: 0 so'm</div>
         <button class="order-btn" id="order-btn" onclick="sendOrder()">Rasmiylashtirish</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp; tg.expand();
         let total = 0;
-        
-        // Tilni URL dan aniqlash
         const urlParams = new URLSearchParams(window.location.search);
         const lang = urlParams.get('lang');
 
-        // Tilga qarab interfeysni moslash
         if (lang === 'rus') {
             document.getElementById('order-btn').innerText = "Оформить заказ";
             document.getElementById('total').innerText = "Итого: 0 сум";
@@ -72,12 +106,7 @@
         }
 
         function sendOrder() { 
-            // Botga yuboriladigan aniq ma'lumot formati
-            let data = {
-                items: "Mahsulotlar tanlandi",
-                total: total
-            };
-            tg.sendData(JSON.stringify(data)); 
+            tg.sendData(JSON.stringify({items: "Buyurtma", total: total})); 
         }
     </script>
 </body>
