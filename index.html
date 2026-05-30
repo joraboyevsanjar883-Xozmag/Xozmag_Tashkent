@@ -67,20 +67,25 @@
         render(products.filter(p => p.name.toLowerCase().includes(val)));
     }
 
-    function checkout() {
-        if (cart.length === 0) {
-            alert("Savat bo'sh!");
-            return;
-        }
-        const data = {
-            items: cart.map(i => i.name).join(", "),
-            total: cart.reduce((sum, p) => sum + p.price, 0)
-        };
-        // Botga ma'lumot jo'natish
-        tg.sendData(JSON.stringify(data));
-        tg.close();
+   function checkout() {
+    console.log("Rasmiylashtirish tugmasi bosildi!"); // Konsolda ko'rinadi
+    
+    if (cart.length === 0) {
+        alert("Savat bo'sh!");
+        return;
     }
 
+    const data = {
+        items: cart.map(i => i.name).join(", "),
+        total: cart.reduce((sum, p) => sum + p.price, 0)
+    };
+
+    console.log("Botga yuborilayotgan ma'lumot:", data); // Konsolda ko'rinadi
+    
+    // Telegramga yuborish
+    window.Telegram.WebApp.sendData(JSON.stringify(data));
+    alert("Ma'lumot botga yuborildi!"); // Agar bu oyna chiqmasa, demak kod ishlamayapti
+}
     render(products);
 </script>
 </body>
