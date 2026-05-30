@@ -2,98 +2,94 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XOZMAG Tashkent</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
-        header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
-        .search-cart { display: flex; justify-content: center; gap: 10px; margin: 10px; }
-        .nav-menu { display: flex; justify-content: center; gap: 10px; padding: 10px; background: white; }
-        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; background: #3498db; color: white; }
-        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
-        .product-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
-        .cart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .cart-content { background: white; margin: 20% auto; padding: 20px; width: 80%; border-radius: 10px; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 10px; }
+        .product-card { background: white; margin: 10px 0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .cart-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #ddd; }
+        .btn { padding: 5px 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>XOZMAG Tashkent</h1>
-</header>
-
-<div class="search-cart">
-    <input type="text" id="searchInput" placeholder="Qidirish..." oninput="filterSearch()">
-    <button class="btn" onclick="openCart()">🛒 Savat (<span id="cartCount">0</span>)</button>
+<div id="lang-selector">
+    <button onclick="setLang('uz')">O'zbekcha</button>
+    <button onclick="setLang('rus')">Русский</button>
 </div>
 
-<div class="nav-menu">
-    <button class="btn" onclick="showCategory('all')">Barchasi</button>
-    <button class="btn" onclick="showCategory('parfume')">Parfyumeriya</button>
-    <button class="btn" onclick="showCategory('build')">Qurilish</button>
-    <button class="btn" onclick="showCategory('chinni')">Chinni</button>
+<div id="main-content" style="display:none;">
+    <h2 id="title">XOZMAG Tashkent</h2>
+    <div id="catalog"></div>
+    <button onclick="openCart()">🛒 <span id="cart-btn">Savat</span></button>
 </div>
 
-<div class="catalog" id="catalog"></div>
-
-<div id="cartModal" class="cart-modal">
-    <div class="cart-content">
-        <h3>Rasmiylashtirish</h3>
-        <div id="cartItems"></div>
-        <p>Jami: <span id="totalPrice">0</span> so'm</p>
-        <button class="btn" onclick="checkout()">Tasdiqlash</button>
-        <button class="btn" style="background:red" onclick="closeCart()">Yopish</button>
-    </div>
+<div id="cartModal" style="display:none; background:white; position:fixed; top:0; width:100%; height:100%; padding:20px;">
+    <h3 id="cart-title">Savatcha</h3>
+    <div id="cartItems"></div>
+    <p>Jami: <span id="totalPrice">0</span> so'm</p>
+    <button onclick="checkout()">Rasmiylashtirish</button>
+    <button onclick="closeCart()">Yopish</button>
 </div>
 
 <script>
+    let lang = 'uz';
+    let cart = []; // {id, name, price, qty}
     const products = [
-        {id: 1, name: "Atir", cat: "parfume", price: 50000},
-        {id: 2, name: "Sement", cat: "build", price: 80000},
-        {id: 3, name: "Piyola", cat: "chinni", price: 10000}
+        {id: 1, name: "Atir", price: 50000},
+        {id: 2, name: "Sement", price: 80000}
     ];
 
-    let cart = [];
-    const tg = window.Telegram.WebApp;
+    function setLang(l) {
+        lang = l;
+        document.getElementById('lang-selector').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        render();
+    }
 
-    function render(list) {
-        document.getElementById('catalog').innerHTML = list.map(p => `
+    function render() {
+        document.getElementById('catalog').innerHTML = products.map(p => `
             <div class="product-card">
-                <h4>${p.name}</h4>
-                <p>${p.price} so'm</p>
-                <button onclick="addToCart(${p.id})">Qo'shish</button>
+                <span>${p.name} - ${p.price} so'm</span>
+                <button onclick="addToCart(${p.id})">+</button>
             </div>
         `).join('');
     }
 
     function addToCart(id) {
-        const p = products.find(i => i.id === id);
-        cart.push(p);
-        document.getElementById('cartCount').innerText = cart.length;
+        let p = products.find(i => i.id === id);
+        let exists = cart.find(i => i.id === id);
+        if(exists) exists.qty++;
+        else cart.push({...p, qty: 1});
+        updateCartCount();
+    }
+
+    function removeFromCart(id) {
+        cart = cart.filter(i => i.id !== id);
+        openCart();
     }
 
     function openCart() {
         document.getElementById('cartModal').style.display = 'block';
-        document.getElementById('cartItems').innerHTML = cart.map(i => `<p>${i.name} - ${i.price} so'm</p>`).join('');
-        document.getElementById('totalPrice').innerText = cart.reduce((s, i) => s + i.price, 0);
-    }
-
-    function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
-
-    function showCategory(c) {
-        if(c === 'all') render(products);
-        else render(products.filter(p => p.cat === c));
+        document.getElementById('cartItems').innerHTML = cart.map(i => `
+            <div class="cart-item">
+                ${i.name} (${i.qty} x ${i.price}) 
+                <button onclick="removeFromCart(${i.id})">❌</button>
+            </div>
+        `).join('');
+        document.getElementById('totalPrice').innerText = cart.reduce((s, i) => s + (i.price * i.qty), 0);
     }
 
     function checkout() {
-        const total = cart.reduce((s, i) => s + i.price, 0);
-        const names = cart.map(i => i.name).join(", ");
-        tg.sendData(JSON.stringify({items: names, total: total}));
-        tg.close();
+        const data = {
+            items: cart.map(i => `${i.name} x${i.qty}`).join(", "),
+            total: cart.reduce((s, i) => s + (i.price * i.qty), 0)
+        };
+        window.Telegram.WebApp.sendData(JSON.stringify(data));
     }
 
-    render(products);
+    function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
+    function updateCartCount() { document.getElementById('cart-btn').innerText = cart.length; }
 </script>
 </body>
 </html>
