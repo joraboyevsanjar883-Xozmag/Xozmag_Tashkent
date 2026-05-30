@@ -2,16 +2,17 @@ import asyncio
 import json
 import logging
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton
+from aiogram.types import Message, KeyboardButton, ReplyKeyboardRemove
 from aiogram.filters import CommandStart
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton
 
-# 1. SOZLAMALAR
+# O'zingizning TOKEN va ADMIN_ID ni kiriting
 TOKEN = "8624663091:AAEj6YvRD5Bv9CfFauyADcC2jXKmaQS6M2w"
-ADMIN_ID = 1181202230  # O'z IDingizni qo'ying
+ADMIN_ID = "1181202230"
 WEB_APP_URL = "https://joraboyevsanjar883-xozmag.github.io/Xozmag_Tashkent/"
 
 logging.basicConfig(level=logging.INFO)
@@ -43,24 +44,22 @@ async def process_lang(message: Message, state: FSMContext):
     await message.answer("✅", reply_markup=ReplyKeyboardRemove())
     await message.answer("Katalogga o'tish:" if lang == "uz" else "Перейти в каталог:", reply_markup=builder.as_markup())
 
-@dp.message(F.web_app_data)
-async def web_data(message: Message, state: FSMContext):
-    import json
-from aiogram import F
-from aiogram.types import Message
-
 # WEB APP DAN KELGAN MA'LUMOTNI QABUL QILISH
 @dp.message(F.web_app_data)
-async def web_app_handler(message: Message):
-    # JSON ma'lumotni o'qiymiz
+async def web_app_handler(message: Message, state: FSMContext):
     data = json.loads(message.web_app_data.data)
     items = data.get("items")
     total = data.get("total")
     
-    # Mijozga va o'zingizga xabar
-    text = f"✅ Yangi buyurtma!\n\n🛍 Mahsulotlar: {items}\n💰 Jami: {total} so'm"
-    await message.answer(text)
-    print(f"Yangi buyurtma keldi: {text}")
+    await state.update_data(items=items, total=total)
+    
+    d = await state.get_data()
+    lang = d.get('lang', 'uz')
+    
+    text = f"✅ Buyurtmangiz qabul qilindi!\n\n🛍 Mahsulotlar: {items}\n💰 Jami: {total} so'm\n\n👤 Iltimos, ism-familiyangizni kiriting:" if lang == 'uz' else f"✅ Ваш заказ принят!\n\n🛍 Товары: {items}\n💰 Итого: {total} сум\n\n👤 Пожалуйста, введите ваше имя:"
+    
+    await message.answer(text, reply_markup=ReplyKeyboardRemove())
+    await state.set_state(OrderState.waiting_for_name)
 
 @dp.message(OrderState.waiting_for_name)
 async def get_name(message: Message, state: FSMContext):
