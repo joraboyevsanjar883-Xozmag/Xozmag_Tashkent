@@ -6,83 +6,82 @@
     <title>XOZMAG Tashkent</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --main: #27ae60; --danger: #e74c3c; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; margin: 0; padding: 10px; }
-        /* Mahsulotlar to'ri */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .card { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card img { width: 100%; border-radius: 8px; }
-        /* Savat tugmasi */
-        .cart-btn { position: fixed; bottom: 20px; right: 20px; background: var(--main); color: white; padding: 15px 25px; border-radius: 30px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        /* Modal oyna */
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); }
-        .content { background: white; margin: 10% auto; padding: 20px; width: 85%; border-radius: 20px; max-height: 70vh; overflow-y: auto; }
-        .row { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding-bottom: 90px; }
+        .header { background: #2c3e50; color: white; padding: 15px; text-align: center; }
+        .search-box { padding: 10px; }
+        .search-box input { width: 95%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+        .card { background: white; padding: 10px; border-radius: 10px; text-align: center; }
+        .cart-footer { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+        .btn-checkout { background: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<h2 style="text-align:center">XOZMAG Katalog</h2>
+<div class="header">XOZMAG Tashkent</div>
 
-<div class="grid" id="catalog"></div>
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="🔍 Qidirish..." onkeyup="filterCatalog()">
+</div>
 
-<div class="cart-btn" onclick="openModal()">🛒 Savat: <span id="count">0</span></div>
+<div class="catalog" id="catalog"></div>
 
-<div id="modal">
-    <div class="content">
-        <h3>Sizning buyurtmangiz</h3>
-        <div id="cartItems"></div>
-        <h4 style="color:var(--main)">Jami: <span id="total">0</span> so'm</h4>
-        <button class="btn" onclick="sendOrder()" style="width:100%; padding:15px; background:var(--main); color:white; border:none; border-radius:10px;">Rasmiylashtirish</button>
-        <button onclick="closeModal()" style="width:100%; padding:10px; margin-top:10px; border:none; background:none;">Yopish</button>
-    </div>
+<div class="cart-footer">
+    <span id="totalText">Jami: 0 so'm</span>
+    <button class="btn-checkout" onclick="checkout()">Rasmiylashtirish</button>
 </div>
 
 <script>
     const products = [
-        {id: 1, name: "Premium Atir", price: 50000},
-        {id: 2, name: "Qurilish Sementi", price: 80000}
+        {id: 1, name: "Piyola Paxtagul", price: 5000},
+        {id: 2, name: "Suyuq sovun 5L", price: 32000},
+        {id: 3, name: "Parfum Perfume", price: 55000}
     ];
-    let cart = [];
 
-    function render() {
-        document.getElementById('catalog').innerHTML = products.map(p => `
+    let cart = [];
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+
+    function render(list) {
+        document.getElementById('catalog').innerHTML = list.map(p => `
             <div class="card">
                 <p>${p.name}</p>
                 <p><b>${p.price} so'm</b></p>
-                <button onclick="add(${p.id})" style="width:100%">Qo'shish</button>
+                <button onclick="addToCart(${p.id})">Savatga</button>
             </div>
         `).join('');
     }
 
-    function add(id) {
+    function addToCart(id) {
         cart.push(products.find(p => p.id === id));
-        document.getElementById('count').innerText = cart.length;
+        updateTotal();
     }
 
-    function openModal() {
-        document.getElementById('modal').style.display = 'block';
-        document.getElementById('cartItems').innerHTML = cart.map((p, i) => `
-            <div class="row">
-                <span>${p.name}</span>
-                <span>${p.price}</span>
-                <button onclick="remove(${i})" style="background:var(--danger); color:white; border:none; border-radius:5px;">X</button>
-            </div>
-        `).join('');
-        document.getElementById('total').innerText = cart.reduce((a, b) => a + b.price, 0);
+    function updateTotal() {
+        let total = cart.reduce((sum, p) => sum + p.price, 0);
+        document.getElementById('totalText').innerText = `Jami: ${total} so'm`;
     }
 
-    function remove(index) {
-        cart.splice(index, 1);
-        openModal();
-        document.getElementById('count').innerText = cart.length;
+    function filterCatalog() {
+        let val = document.getElementById('searchInput').value.toLowerCase();
+        render(products.filter(p => p.name.toLowerCase().includes(val)));
     }
 
-    function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    function sendOrder() {
-        window.Telegram.WebApp.sendData(JSON.stringify({items: cart.map(i=>i.name), total: cart.reduce((a,b)=>a+b.price, 0)}));
+    function checkout() {
+        if (cart.length === 0) {
+            alert("Savat bo'sh!");
+            return;
+        }
+        const data = {
+            items: cart.map(i => i.name).join(", "),
+            total: cart.reduce((sum, p) => sum + p.price, 0)
+        };
+        // Botga ma'lumot jo'natish
+        tg.sendData(JSON.stringify(data));
+        tg.close();
     }
-    render();
+
+    render(products);
 </script>
 </body>
 </html>
