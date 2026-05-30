@@ -46,19 +46,15 @@ async def process_lang(message: Message, state: FSMContext):
 
 # WEB APP DAN KELGAN MA'LUMOTNI QABUL QILISH
 @dp.message(F.web_app_data)
-async def web_app_handler(message: Message, state: FSMContext):
+async def web_data(message: Message, state: FSMContext):
+    # Ma'lumotni qabul qilish
     data = json.loads(message.web_app_data.data)
-    items = data.get("items")
-    total = data.get("total")
+    await state.update_data(items=data.get('items'), total=data.get('total'))
     
-    await state.update_data(items=items, total=total)
+    # BOT JAVOB QAYTARISHI SHART! (Rasmda bu qismi yo'q)
+    await message.answer("✅ Buyurtmangiz qabul qilindi! Iltimos, ism-familiyangizni kiriting:")
     
-    d = await state.get_data()
-    lang = d.get('lang', 'uz')
-    
-    text = f"✅ Buyurtmangiz qabul qilindi!\n\n🛍 Mahsulotlar: {items}\n💰 Jami: {total} so'm\n\n👤 Iltimos, ism-familiyangizni kiriting:" if lang == 'uz' else f"✅ Ваш заказ принят!\n\n🛍 Товары: {items}\n💰 Итого: {total} сум\n\n👤 Пожалуйста, введите ваше имя:"
-    
-    await message.answer(text, reply_markup=ReplyKeyboardRemove())
+    # Keyingi bosqichga o'tish
     await state.set_state(OrderState.waiting_for_name)
 
 @dp.message(OrderState.waiting_for_name)
