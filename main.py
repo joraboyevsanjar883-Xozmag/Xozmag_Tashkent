@@ -45,13 +45,22 @@ async def process_lang(message: Message, state: FSMContext):
 
 @dp.message(F.web_app_data)
 async def web_data(message: Message, state: FSMContext):
+    import json
+from aiogram import F
+from aiogram.types import Message
+
+# WEB APP DAN KELGAN MA'LUMOTNI QABUL QILISH
+@dp.message(F.web_app_data)
+async def web_app_handler(message: Message):
+    # JSON ma'lumotni o'qiymiz
     data = json.loads(message.web_app_data.data)
-    await state.update_data(items=data.get('items'), total=data.get('total'))
+    items = data.get("items")
+    total = data.get("total")
     
-    lang = (await state.get_data()).get('lang', 'uz')
-    txt = "👤 Ism-familiyangizni kiriting:" if lang == "uz" else "👤 Введите ваше имя:"
-    await message.answer(txt, reply_markup=ReplyKeyboardRemove())
-    await state.set_state(OrderState.waiting_for_name)
+    # Mijozga va o'zingizga xabar
+    text = f"✅ Yangi buyurtma!\n\n🛍 Mahsulotlar: {items}\n💰 Jami: {total} so'm"
+    await message.answer(text)
+    print(f"Yangi buyurtma keldi: {text}")
 
 @dp.message(OrderState.waiting_for_name)
 async def get_name(message: Message, state: FSMContext):

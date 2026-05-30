@@ -2,91 +2,43 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XOZMAG Tashkent</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding-bottom: 90px; }
-        .header { background: #2c3e50; color: white; padding: 15px; text-align: center; }
-        .search-box { padding: 10px; }
-        .search-box input { width: 95%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
-        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
-        .card { background: white; padding: 10px; border-radius: 10px; text-align: center; }
-        .cart-footer { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
-        .btn-checkout { background: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; }
+        body { font-family: sans-serif; padding: 10px; }
+        .product { display: flex; justify-content: space-between; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-
-<div class="header">XOZMAG Tashkent</div>
-
-<div class="search-box">
-    <input type="text" id="searchInput" placeholder="🔍 Qidirish..." onkeyup="filterCatalog()">
-</div>
-
-<div class="catalog" id="catalog"></div>
-
-<div class="cart-footer">
-    <span id="totalText">Jami: 0 so'm</span>
-    <button class="btn-checkout" onclick="checkout()">Rasmiylashtirish</button>
-</div>
-
-<script>
-    const products = [
-        {id: 1, name: "Piyola Paxtagul", price: 5000},
-        {id: 2, name: "Suyuq sovun 5L", price: 32000},
-        {id: 3, name: "Parfum Perfume", price: 55000}
-    ];
-
-    let cart = [];
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-
-    function render(list) {
-        document.getElementById('catalog').innerHTML = list.map(p => `
-            <div class="card">
-                <p>${p.name}</p>
-                <p><b>${p.price} so'm</b></p>
-                <button onclick="addToCart(${p.id})">Savatga</button>
-            </div>
-        `).join('');
-    }
-
-    function addToCart(id) {
-        cart.push(products.find(p => p.id === id));
-        updateTotal();
-    }
-
-    function updateTotal() {
-        let total = cart.reduce((sum, p) => sum + p.price, 0);
-        document.getElementById('totalText').innerText = `Jami: ${total} so'm`;
-    }
-
-    function filterCatalog() {
-        let val = document.getElementById('searchInput').value.toLowerCase();
-        render(products.filter(p => p.name.toLowerCase().includes(val)));
-    }
-
-   function checkout() {
-    console.log("Rasmiylashtirish tugmasi bosildi!"); // Konsolda ko'rinadi
+    <h3>XOZMAG Katalog</h3>
+    <div id="catalog">
+        <div class="product"><span>Atir</span> <button onclick="addToCart('Atir', 50000)">+</button></div>
+        <div class="product"><span>Sement</span> <button onclick="addToCart('Sement', 80000)">+</button></div>
+    </div>
     
-    if (cart.length === 0) {
-        alert("Savat bo'sh!");
-        return;
-    }
+    <hr>
+    <h3>Savat</h3>
+    <div id="cart"></div>
+    <h4 id="total">Jami: 0 so'm</h4>
+    <button onclick="checkout()" style="width:100%; padding:15px; background:green; color:white;">Rasmiylashtirish</button>
 
-    const data = {
-        items: cart.map(i => i.name).join(", "),
-        total: cart.reduce((sum, p) => sum + p.price, 0)
-    };
-
-    console.log("Botga yuborilayotgan ma'lumot:", data); // Konsolda ko'rinadi
-    
-    // Telegramga yuborish
-    window.Telegram.WebApp.sendData(JSON.stringify(data));
-    alert("Ma'lumot botga yuborildi!"); // Agar bu oyna chiqmasa, demak kod ishlamayapti
-}
-    render(products);
-</script>
+    <script>
+        let cart = [];
+        function addToCart(name, price) {
+            cart.push({name, price});
+            renderCart();
+        }
+        function renderCart() {
+            let container = document.getElementById('cart');
+            container.innerHTML = cart.map((item, index) => 
+                `<div>${item.name} <button onclick="cart.splice(${index},1); renderCart()">❌</button></div>`
+            ).join('');
+            document.getElementById('total').innerText = "Jami: " + cart.reduce((a,b) => a + b.price, 0) + " so'm";
+        }
+        function checkout() {
+            let total = cart.reduce((a,b) => a + b.price, 0);
+            let items = cart.map(i => i.name).join(", ");
+            window.Telegram.WebApp.sendData(JSON.stringify({items: items, total: total}));
+        }
+    </script>
 </body>
 </html>
